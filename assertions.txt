@@ -1,0 +1,100 @@
+1. (innere) Punkte disjunkt bei
+ a. HOUSE_STREET_DISJOINT: Haus <-> Straße
+ b. HOUSE_HOUSE_DISJOINT: Haus <-> Haus
+ c. HOUSE_LAKE_DISJOINT: Haus <-> See
+ d. STREET_LAKE_DISJOINT: Straße <-> See
+ e. STREET_LANDUSE_DISJOINT: Straße <-> Landnutzung
+ f. STREET_PLAYGROUND_DISJOINT: Straße <-> Spielplatz
+ 
+2. NO_STANDALONE_STOP: An einer Haltestelle verläuft eine Straße, Straßenbahn- oder Eisenbahnlinie (in welchem Abstand r?)
+
+3. WATER_CROSSING: Wenn eine Straße, Straßenbahn- oder Eisenbahnlinie und ein Fluss sich kreuzen,
+    ist dort eine Brücke oder ein Tunnel über/unter dem Fluss
+   
+4. TRAFFIC_LIGHT_AT_STREET: Ampeln stehen an Straßen mit höchstens Abstand r
+
+5. PARKING_REACHABLE: Zu einem Parkplatz führt eine Straße oder an diesem in höchstens Abstand r entlang
+
+
+Umsetzung:
+CREATE ASSERTION HOUSE_STREET_DISJOINT CHECK (
+    NOT EXISTS (
+        SELECT * FROM Haus AS h JOIN Strasse AS s WHERE h.umriss && s.verlauf
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION HOUSE_HOUSE_DISJOINT CHECK (
+    NOT EXISTS (
+        SELECT * FROM Haus AS h1 JOIN Haus AS h2 WHERE h1.umriss && h2.umriss
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION HOUSE_LAKE_DISJOINT CHECK (
+    NOT EXISTS (
+        SELECT * FROM Haus AS h JOIN See AS l WHERE h.umriss && l.umriss
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION STREET_LAKE_DISJOINT CHECK (
+    NOT EXISTS (
+        SELECT * FROM Strasse AS s JOIN See AS l WHERE s.verlauf && l.umriss
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION STREET_LANDUSE_DISJOINT CHECK (
+    NOT EXISTS (
+        SELECT * FROM Strasse AS s JOIN Landnutzung AS l WHERE s.verlauf && l.umriss
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION STREET_PLAYGROUND_DISJOINT CHECK (
+    NOT EXISTS (
+        SELECT * FROM Strasse AS s JOIN Spielplatz AS p WHERE s.verlauf && p.umriss
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION NO_STANDALONE_STOP CHECK (
+    NOT EXISTS (
+        SELECT * FROM Haltestelle AS b
+            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (circle(b.position, r) && s.verlauf))
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION WATER_CROSSING CHECK (
+    NOT EXISTS (
+        SELECT * FROM Strasse AS s JOIN Fluss AS r ON s.verlauf && r.verlauf
+            WHERE NOT EXISTS (SELECT * FROM Bruecke AS b WHERE (b.verlauf && (s.verlauf # r.verlauf))
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION TRAFFIC_LIGHT_AT_STREET CHECK (
+    NOT EXISTS (
+        SELECT * FROM Ampel AS t
+            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (circle(t.position, r) && s.verlauf))
+    )
+)
+
+----------------------------------
+
+CREATE ASSERTION PARKING_REACHABLE CHECK (
+    NOT EXISTS (
+        SELECT * FROM Parkplatz AS p
+            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (circle(p.position, r) && s.verlauf))
+    )
+)
