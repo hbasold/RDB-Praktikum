@@ -1,0 +1,17 @@
+CREATE TABLE Ampel (position Point);
+CREATE TABLE Haltestelle (position Point, haltestellentyp varchar(10), name varchar(100));
+CREATE TABLE Parkplatz (position Point, name varchar(100));
+
+CREATE TABLE Park (umriss Polygon, name varchar(100));
+CREATE TABLE Spielplatz (umriss Polygon, name varchar(100));
+CREATE TABLE Landnutzung (umriss Polygon);
+CREATE TABLE See (umriss Polygon, name varchar(100));
+CREATE TABLE Haus (umriss Polygon, hausnummer int, ort varchar(100), plz varchar(10), nutzung varchar(100));
+
+
+CREATE TABLE Bruecke (verlauf Path, name varchar(100), maxV int);
+CREATE TABLE Tunnel (verlauf Path, name varchar(100), maxV int);
+CREATE TABLE Strasse (verlauf Path, strassentyp varchar(20), name varchar(100), maxV int);
+CREATE TABLE Strassenbahn (verlauf Path);
+CREATE TABLE Eisenbahn (verlauf Path, name varchar(100));
+CREATE TABLE Fluss (verlauf Path, name varchar(100));
