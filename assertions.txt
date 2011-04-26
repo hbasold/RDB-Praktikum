@@ -19,7 +19,7 @@
 Umsetzung:
 CREATE ASSERTION HOUSE_STREET_DISJOINT CHECK (
     NOT EXISTS (
-        SELECT * FROM Haus AS h JOIN Strasse AS s WHERE h.umriss && s.verlauf
+        SELECT * FROM Haus AS h CROSS JOIN Strasse AS s WHERE path(h.umriss) ?# s.verlauf
     )
 )
 
@@ -27,7 +27,7 @@ CREATE ASSERTION HOUSE_STREET_DISJOINT CHECK (
 
 CREATE ASSERTION HOUSE_HOUSE_DISJOINT CHECK (
     NOT EXISTS (
-        SELECT * FROM Haus AS h1 JOIN Haus AS h2 WHERE h1.umriss && h2.umriss
+        SELECT * FROM Haus AS h1 CROSS JOIN Haus AS h2 WHERE h1.umriss && h2.umriss
     )
 )
 
@@ -35,7 +35,7 @@ CREATE ASSERTION HOUSE_HOUSE_DISJOINT CHECK (
 
 CREATE ASSERTION HOUSE_LAKE_DISJOINT CHECK (
     NOT EXISTS (
-        SELECT * FROM Haus AS h JOIN See AS l WHERE h.umriss && l.umriss
+        SELECT * FROM Haus AS h CROSS JOIN See AS l WHERE h.umriss && l.umriss
     )
 )
 
@@ -43,7 +43,7 @@ CREATE ASSERTION HOUSE_LAKE_DISJOINT CHECK (
 
 CREATE ASSERTION STREET_LAKE_DISJOINT CHECK (
     NOT EXISTS (
-        SELECT * FROM Strasse AS s JOIN See AS l WHERE s.verlauf && l.umriss
+        SELECT * FROM Strasse AS s CROSS JOIN See AS l WHERE s.verlauf ?# path(l.umriss)
     )
 )
 
@@ -51,7 +51,7 @@ CREATE ASSERTION STREET_LAKE_DISJOINT CHECK (
 
 CREATE ASSERTION STREET_LANDUSE_DISJOINT CHECK (
     NOT EXISTS (
-        SELECT * FROM Strasse AS s JOIN Landnutzung AS l WHERE s.verlauf && l.umriss
+        SELECT * FROM Strasse AS s CROSS JOIN Landnutzung AS l WHERE s.verlauf ?# path(l.umriss)
     )
 )
 
@@ -59,7 +59,7 @@ CREATE ASSERTION STREET_LANDUSE_DISJOINT CHECK (
 
 CREATE ASSERTION STREET_PLAYGROUND_DISJOINT CHECK (
     NOT EXISTS (
-        SELECT * FROM Strasse AS s JOIN Spielplatz AS p WHERE s.verlauf && p.umriss
+        SELECT * FROM Strasse AS s CROSS JOIN Spielplatz AS p WHERE s.verlauf ?# path(p.umriss)
     )
 )
 
@@ -68,7 +68,7 @@ CREATE ASSERTION STREET_PLAYGROUND_DISJOINT CHECK (
 CREATE ASSERTION NO_STANDALONE_STOP CHECK (
     NOT EXISTS (
         SELECT * FROM Haltestelle AS b
-            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (circle(b.position, r) && s.verlauf))
+            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (path(polygon(256, circle(b.position, r))) ?# s.verlauf))
     )
 )
 
@@ -76,7 +76,7 @@ CREATE ASSERTION NO_STANDALONE_STOP CHECK (
 
 CREATE ASSERTION WATER_CROSSING CHECK (
     NOT EXISTS (
-        SELECT * FROM Strasse AS s JOIN Fluss AS r ON s.verlauf && r.verlauf
+        SELECT * FROM Strasse AS s JOIN Fluss AS r ON s.verlauf ?# r.verlauf
             WHERE NOT EXISTS (SELECT * FROM Bruecke AS b WHERE (b.verlauf && (s.verlauf # r.verlauf))
     )
 )
@@ -86,7 +86,7 @@ CREATE ASSERTION WATER_CROSSING CHECK (
 CREATE ASSERTION TRAFFIC_LIGHT_AT_STREET CHECK (
     NOT EXISTS (
         SELECT * FROM Ampel AS t
-            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (circle(t.position, r) && s.verlauf))
+            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (path(polygon(256, circle(t.position, r))) ?# s.verlauf))
     )
 )
 
@@ -95,6 +95,6 @@ CREATE ASSERTION TRAFFIC_LIGHT_AT_STREET CHECK (
 CREATE ASSERTION PARKING_REACHABLE CHECK (
     NOT EXISTS (
         SELECT * FROM Parkplatz AS p
-            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (circle(p.position, r) && s.verlauf))
+            WHERE NOT EXISTS (SELECT * FROM Strasse AS s WHERE (path(polygon(256, circle(p.position, r))) ?# s.verlauf))
     )
 )
