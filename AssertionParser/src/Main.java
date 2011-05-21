@@ -38,7 +38,7 @@ public class Main {
                 CheckAssertions check = new CheckAssertions(conn);
                 String error = check.check(assertions);
                 if(error != null){
-                    System.err.println("Semantic error: " + error);
+                    System.err.println(error);
                 }
             }
             catch (FileNotFoundException e) {
