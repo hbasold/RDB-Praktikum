@@ -21,16 +21,19 @@ public class CheckAssertions {
     
     private final String syntaxErrorString = ".* Syntaxfehler bei »(.*)«\\s+ Position: (\\d+).*";
     private final String notExistsErrorPattern = ".* (\\w+) »?([\\w.]+)«? existiert nicht\\s+ Position: (\\d+).*";
+    private final String errorPattern = "FEHLER: ((?:.|\\s)*)";
     
     Connection sql;
     Pattern syntaxErrorParser;
     Pattern notExistsErrorParser;
+    Pattern errorParser;
 
     public CheckAssertions(Connection conn) throws SQLException {
         sql = conn;
         checkTestTables();
         syntaxErrorParser = Pattern.compile(syntaxErrorString);
         notExistsErrorParser = Pattern.compile(notExistsErrorPattern);
+        errorParser = Pattern.compile(errorPattern);
     }
 
     private void checkTestTables() throws SQLException {
@@ -66,7 +69,7 @@ public class CheckAssertions {
         }
         
         if(error != null){
-            error = "Error in assertion " + a.name + " on line " + a.line + ": " + error + ".";
+            error = "Error in assertion " + a.name + " on line " + a.line + ": \n\t" + error + ".";
         }
         
         return error;
@@ -81,7 +84,7 @@ public class CheckAssertions {
         catch (SQLException e) {
             // Leider funktionieren die Fehlercodes etc. mit dem Postgres-Backend scheinbar nicht...
             if(e.getMessage().contains(syntaxErrorString)){
-                return "invalid SQL identifier";
+                return "name is an invalid SQL identifier";
             }
             else{
                 throw e;
@@ -113,7 +116,13 @@ public class CheckAssertions {
                     return "error in predicate at position " + m.group(3) + ": " + m.group(1) + " \"" + m.group(2) + "\" does not exist";
                 }
                 else{
-                    throw e;
+                    m = errorParser.matcher(error);
+                    if(m.matches()){
+                        return m.group(1);
+                    }
+                    else{
+                        throw e;
+                    }
                 }
             }
         }
