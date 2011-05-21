@@ -15,14 +15,14 @@ public class TestParsing {
         else{
             try {
                 FileReader input = new FileReader(args[0]);
-                Parser parser = new Parser();
+                AssertionParser parser = new AssertionParser();
                 Vector<Assertion> assertions = parser.parse(input);
                 System.out.println(assertions);
             }
             catch (FileNotFoundException e) {
                 System.err.println("Could not open file \"" + args[0] + "\": " + e.getMessage());
             }
-            catch (ParseError e) {
+            catch (AssertionParseError e) {
                 System.err.println("Parse error:" + e.getMessage());
             }
         }        

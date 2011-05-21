@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  * @author henning
  *
  */
-public class Parser {
+public class AssertionParser {
     
     Integer next;
     int line;
@@ -15,11 +15,11 @@ public class Parser {
     
     Pattern identifierPattern;
     
-    Parser(){
+    AssertionParser(){
         identifierPattern = Pattern.compile("[_a-zA-Z][_a-zA-Z0-9]*");
     }
     
-    public Vector<Assertion> parse(InputStreamReader input) throws ParseError {
+    public Vector<Assertion> parse(InputStreamReader input) throws AssertionParseError {
         Vector<Assertion> asserts = new Vector<Assertion>();
         
         InputStreamIterator in = new InputStreamIterator(input);
@@ -31,7 +31,7 @@ public class Parser {
             nextChar(in);
         }
         else{
-            throw new ParseError("Empty input", line, column);
+            throw new AssertionParseError("Empty input", line, column);
         }
         
         while(in.hasNext()){
@@ -45,9 +45,9 @@ public class Parser {
     /**
      * @param in
      * @return 
-     * @throws ParseError
+     * @throws AssertionParseError
      */
-    private Assertion parseAssertion(InputStreamIterator in) throws ParseError {
+    private Assertion parseAssertion(InputStreamIterator in) throws AssertionParseError {
         skipWS(in);
         parseLiteral("CREATE", in);
         
@@ -61,7 +61,7 @@ public class Parser {
             identifier = parseIndentifier(in);
         }
         else {
-            throw new ParseError("Expected indentifier", line, column);
+            throw new AssertionParseError("Expected indentifier", line, column);
         }
         
         skipWS(in);        
@@ -77,7 +77,7 @@ public class Parser {
             predicate = parsePredicate(in);
         }
         else {
-            throw new ParseError("Expected predicate", line, column);
+            throw new AssertionParseError("Expected predicate", line, column);
         }
         
         skipWS(in);        
@@ -112,9 +112,9 @@ public class Parser {
         return Character.isWhitespace(next.intValue());
     }
     
-    private void parseLiteral(String toParse, InputStreamIterator in) throws ParseError {
+    private void parseLiteral(String toParse, InputStreamIterator in) throws AssertionParseError {
         if(next == null){
-            throw new ParseError("Expected token \"" + toParse + "\"", line, column);
+            throw new AssertionParseError("Expected token \"" + toParse + "\"", line, column);
         }
         
         int pos = 0;
@@ -122,7 +122,7 @@ public class Parser {
         
         read.appendCodePoint(next.intValue());        
         if(!isCaseInsensitveEqual(toParse.codePointAt(pos), next.intValue())){
-            throw new ParseError("Expected token \"" + toParse + "\" but got \"" + read + "\"", line, column);
+            throw new AssertionParseError("Expected token \"" + toParse + "\" but got \"" + read + "\"", line, column);
         }
         ++pos;
         
@@ -131,7 +131,7 @@ public class Parser {
             read.appendCodePoint(next.intValue());
             
             if(!isCaseInsensitveEqual(toParse.codePointAt(pos), next.intValue())){
-                throw new ParseError("Expected token \"" + toParse + "\" but got \"" + read + "\"", line, column);
+                throw new AssertionParseError("Expected token \"" + toParse + "\" but got \"" + read + "\"", line, column);
             }
             ++pos;
         }
@@ -145,7 +145,7 @@ public class Parser {
         return Character.toLowerCase(a) == Character.toLowerCase(b);
     }
     
-    private String parseIndentifier(InputStreamIterator in) throws ParseError {
+    private String parseIndentifier(InputStreamIterator in) throws AssertionParseError {
         int oldLine = line;
         int oldColumn = column;
         
@@ -170,11 +170,11 @@ public class Parser {
             return word.toString();
         }
         else{
-            throw new ParseError("Expected identifier but got \"" + word + "\"", oldLine, oldColumn);
+            throw new AssertionParseError("Expected identifier but got \"" + word + "\"", oldLine, oldColumn);
         }
     }
     
-    private String parsePredicate(InputStreamIterator in) throws ParseError {
+    private String parsePredicate(InputStreamIterator in) throws AssertionParseError {
         StringBuffer predicate = new StringBuffer();
         boolean predComplete = false;
         
@@ -194,15 +194,15 @@ public class Parser {
         }
         
         if(!in.hasNext() && !predComplete){
-            throw new ParseError("Expected \";\"", line, column);
+            throw new AssertionParseError("Expected \";\"", line, column);
         }
         
         String p = predicate.toString().trim();
         if(p.isEmpty()){
-            throw new ParseError("Expected non empty predicate", line, column);
+            throw new AssertionParseError("Expected non empty predicate", line, column);
         }
         else if(p.codePointAt(p.length() - 1) != ')'){
-            throw new ParseError("Expected \")\"", line, column);
+            throw new AssertionParseError("Expected \")\"", line, column);
         }
         else{
             return p.substring(0, p.length() - 2).trim();
