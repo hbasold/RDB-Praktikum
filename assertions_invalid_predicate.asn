@@ -1,0 +1,4 @@
+CREATE ASSERTION invPred CHECK (
+    CREATE TABLE hallo (test INTEGER)
+);
+

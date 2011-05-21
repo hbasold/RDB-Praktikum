@@ -1,5 +1,8 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Vector;
 
 import checking.CheckAssertions;
@@ -20,19 +23,36 @@ public class Main {
         }
         else{
             try {
+                // Assertions parsen
                 FileReader input = new FileReader(args[0]);
                 AssertionParser parser = new AssertionParser();
                 Vector<Assertion> assertions = parser.parse(input);
                 System.out.println(assertions);
                 
-                CheckAssertions check = new CheckAssertions();
-                check.check(assertions);
+                // Datenbankverbindung
+                Class.forName("org.postgresql.Driver");
+                String url = "jdbc:postgresql://localhost:5432/rdb_praktikum";
+                Connection conn = DriverManager.getConnection(url, "henning", "henning");
+                
+                // Assertions prüfen
+                CheckAssertions check = new CheckAssertions(conn);
+                String error = check.check(assertions);
+                if(error != null){
+                    System.err.println("Semantic error: " + error);
+                }
             }
             catch (FileNotFoundException e) {
                 System.err.println("Could not open file \"" + args[0] + "\": " + e.getMessage());
             }
             catch (AssertionParseError e) {
                 System.err.println("Parse error:" + e.getMessage());
+            }
+            catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (SQLException e) {
+                System.err.println("Database error: " + e.getMessage());
             }
         }
     }

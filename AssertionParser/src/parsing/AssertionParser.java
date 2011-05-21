@@ -25,7 +25,7 @@ public class AssertionParser {
         
         InputStreamIterator in = new InputStreamIterator(input);
         next = null;
-        line = 0;
+        line = 1;
         column = 0;
         
         if(in.hasNext()){
@@ -50,6 +50,9 @@ public class AssertionParser {
      */
     private Assertion parseAssertion(InputStreamIterator in) throws AssertionParseError {
         skipWS(in);
+        
+        int startLine = line;
+        
         parseLiteral("CREATE", in);
         
         skipWS(in);        
@@ -84,7 +87,7 @@ public class AssertionParser {
         skipWS(in);        
         parseLiteral(";", in);
         
-        return new Assertion(identifier, predicate);
+        return new Assertion(startLine, identifier, predicate);
     }
 
     private void skipWS(InputStreamIterator in) {
