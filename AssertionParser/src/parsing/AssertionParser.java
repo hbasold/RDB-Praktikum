@@ -1,3 +1,4 @@
+package parsing;
 import java.io.InputStreamReader;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -15,7 +16,7 @@ public class AssertionParser {
     
     Pattern identifierPattern;
     
-    AssertionParser(){
+    public AssertionParser(){
         identifierPattern = Pattern.compile("[_a-zA-Z][_a-zA-Z0-9]*");
     }
     

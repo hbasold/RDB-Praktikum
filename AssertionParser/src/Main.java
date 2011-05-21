@@ -2,8 +2,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Vector;
 
+import checking.CheckAssertions;
 
-public class TestParsing {
+import parsing.Assertion;
+import parsing.AssertionParseError;
+import parsing.AssertionParser;
+
+
+public class Main {
 
     /**
      * @param args
@@ -18,6 +24,9 @@ public class TestParsing {
                 AssertionParser parser = new AssertionParser();
                 Vector<Assertion> assertions = parser.parse(input);
                 System.out.println(assertions);
+                
+                CheckAssertions check = new CheckAssertions();
+                check.check(assertions);
             }
             catch (FileNotFoundException e) {
                 System.err.println("Could not open file \"" + args[0] + "\": " + e.getMessage());
@@ -25,6 +34,7 @@ public class TestParsing {
             catch (AssertionParseError e) {
                 System.err.println("Parse error:" + e.getMessage());
             }
-        }        
+        }
     }
+
 }

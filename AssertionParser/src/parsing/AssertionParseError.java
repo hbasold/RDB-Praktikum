@@ -1,7 +1,8 @@
+package parsing;
 
 
 /**
- * 
+ * Wird geworfen, wenn während des Parsens ein Fehler auftritt.
  */
 
 public class AssertionParseError extends Exception {
