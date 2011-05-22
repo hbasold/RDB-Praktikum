@@ -69,7 +69,7 @@ public class CheckAssertions {
         }
 
         if(error != null){
-            error = "Error in assertion " + a.name + " on line " + a.line + ": \n\t" + error;
+            error = "Error in assertion " + a.name + " on line " + a.line + ": \n    " + error;
         }
 
         return error;

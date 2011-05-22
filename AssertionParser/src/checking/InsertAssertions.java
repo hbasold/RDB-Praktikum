@@ -54,7 +54,7 @@ public class InsertAssertions {
     private String insertAssertion(Assertion a) throws SQLException {
         String error = insertAssertion_(a);
         if(error != null){
-            error = "Error in assertion " + a.name + " on line " + a.line + ": \n\t" + error + ".";
+            error = "Error in assertion " + a.name + " on line " + a.line + ": \n    " + error + ".";
         }
         return error;
     }
@@ -64,7 +64,8 @@ public class InsertAssertions {
 
         try {
             if(isReinsertion(a)){
-                System.out.println("Warning: assertion " + a.name + " already exists with same predicate. It is not inserted again");
+                System.out.println("Warning: assertion " + a.name + " on line " + a.line + " already exists with same predicate.\n" +
+                                    "    It is not inserted again.");
             }
             else{
                 create.executeUpdate("INSERT INTO AssertionSysRel VALUES('" + a.name + "','" + a.predicate + "',false)");

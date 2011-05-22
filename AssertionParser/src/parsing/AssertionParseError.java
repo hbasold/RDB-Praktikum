@@ -20,6 +20,6 @@ public class AssertionParseError extends Exception {
 
     @Override
     public String getMessage(){
-        return "Parse error at " + line + ":" + column + ": " + what;
+        return "Parse error at " + line + ":" + column + ":\n    " + what;
     }
 }
