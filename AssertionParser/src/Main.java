@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Vector;
 
 import checking.CheckAssertions;
+import checking.InsertAssertions;
 
 import parsing.Assertion;
 import parsing.AssertionParseError;
@@ -39,6 +40,14 @@ public class Main {
                 String error = check.check(assertions);
                 if(error != null){
                     System.err.println(error);
+                }
+                else{                
+                    // Assertions speichern
+                    InsertAssertions insert = new InsertAssertions(conn);
+                    error = insert.insert(assertions);
+                    if(error != null){
+                        System.err.println(error);
+                    }
                 }
             }
             catch (FileNotFoundException e) {
