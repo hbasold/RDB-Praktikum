@@ -83,8 +83,9 @@ public class CheckAssertions {
         }
         catch (SQLException e) {
             // Leider funktionieren die Fehlercodes etc. mit dem Postgres-Backend scheinbar nicht...
-            if(e.getMessage().contains(syntaxErrorString)){
-                return "name is an invalid SQL identifier";
+            Matcher m = syntaxErrorParser.matcher(e.getMessage());
+            if(m.matches()){
+                return "\"" + name + "\" is an invalid SQL identifier";
             }
             else{
                 throw e;

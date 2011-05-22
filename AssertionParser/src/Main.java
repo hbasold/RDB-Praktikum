@@ -57,7 +57,7 @@ public class Main {
                 System.err.println("Could not open file \"" + args[0] + "\": " + e.getMessage());
             }
             catch (AssertionParseError e) {
-                System.err.println("Parse error:" + e.getMessage());
+                System.err.println("Parse error: " + e.getMessage());
             }
             catch (ClassNotFoundException e) {
                 // TODO Auto-generated catch block
