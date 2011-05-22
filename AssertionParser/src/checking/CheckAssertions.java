@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package checking;
 
@@ -18,11 +18,11 @@ import parsing.Assertion;
  *
  */
 public class CheckAssertions {
-    
+
     private final String syntaxErrorString = ".* Syntaxfehler bei »(.*)«\\s+ Position: (\\d+).*";
     private final String notExistsErrorPattern = ".* (\\w+) »?([\\w.]+)«? existiert nicht\\s+ Position: (\\d+).*";
     private final String errorPattern = "FEHLER: ((?:.|\\s)*)";
-    
+
     Connection sql;
     Pattern syntaxErrorParser;
     Pattern notExistsErrorParser;
@@ -38,10 +38,10 @@ public class CheckAssertions {
 
     private void checkTestTables() throws SQLException {
         Statement create = sql.createStatement();
-        
+
         try {
             ResultSet exists = create.executeQuery("SELECT count(relname) AS hasTable FROM pg_class WHERE lower(relname) = lower('TestSysRel')");
-            
+
             if(exists.next() && exists.getInt("hasTable") == 0){
                 create.executeUpdate("CREATE TABLE TestSysRel (Attribut INTEGER NOT NULL, PRIMARY KEY (Attribut))");
                 create.executeUpdate("INSERT INTO TestSysRel VALUES(1)");
@@ -67,11 +67,11 @@ public class CheckAssertions {
         if(error == null){
             error = checkPredicate(a.predicate);
         }
-        
+
         if(error != null){
             error = "Error in assertion " + a.name + " on line " + a.line + ": \n\t" + error + ".";
         }
-        
+
         return error;
     }
 
@@ -92,14 +92,14 @@ public class CheckAssertions {
         }
         finally {
             create.close();
-        }       
-        
+        }
+
         return null;
     }
-    
+
     private String checkPredicate(String predicate) throws SQLException {
         Statement select = sql.createStatement();
-        
+
         try {
             select.executeQuery("SELECT * FROM TestSysRel WHERE " + predicate);
         }
@@ -109,7 +109,7 @@ public class CheckAssertions {
             Matcher m = syntaxErrorParser.matcher(error);
             if(m.matches()){
                 return "syntactic error in predicate at position " + m.group(2) + " near \"" + m.group(1) + "\"";
-            }            
+            }
             else {
                 m = notExistsErrorParser.matcher(error);
                 if(m.matches()){
@@ -129,7 +129,7 @@ public class CheckAssertions {
         finally {
             select.close();
         }
-        
+
         return null;
     }
 

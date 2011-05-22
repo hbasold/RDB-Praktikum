@@ -9,7 +9,7 @@ import java.util.Vector;
 import parsing.Assertion;
 
 public class InsertAssertions {
-    
+
     private final String doubleEntryErrorString = "FEHLER: doppelter Schlüsselwert verletzt Unique-Constraint »assertionsysrel_pkey«";
 
     private Connection sql;
@@ -18,13 +18,13 @@ public class InsertAssertions {
         sql = conn;
         checkTables();
     }
-    
+
     private void checkTables() throws SQLException {
         Statement create = sql.createStatement();
-        
+
         try {
             ResultSet exists = create.executeQuery("SELECT count(relname) AS hasTable FROM pg_class WHERE lower(relname) = lower('AssertionSysRel')");
-            
+
             if(exists.next() && exists.getInt("hasTable") == 0){
                 create.executeUpdate(
                     "CREATE TABLE AssertionSysRel (" +
@@ -61,7 +61,7 @@ public class InsertAssertions {
 
     private String insertAssertion_(Assertion a) throws SQLException {
         Statement create = sql.createStatement();
-        
+
         try {
             if(isReinsertion(a)){
                 System.out.println("Warning: assertion " + a.name + " already exists with same predicate. It is not inserted again");
@@ -78,16 +78,16 @@ public class InsertAssertions {
                     return "assertion already exists with another predicate";
                 }
             }
-            
+
             throw e;
         }
-        
+
         return null;
     }
 
     private boolean isReinsertion(Assertion a) throws SQLException {
         Statement check = sql.createStatement();
-        
+
         ResultSet pred = check.executeQuery("SELECT Bedingung FROM AssertionSysRel WHERE Assertionname='" + a.name + "'");
         if(pred.next()){
             String p = pred.getString(1);

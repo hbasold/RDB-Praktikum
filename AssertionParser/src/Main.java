@@ -29,19 +29,19 @@ public class Main {
                 AssertionParser parser = new AssertionParser();
                 Vector<Assertion> assertions = parser.parse(input);
                 System.out.println(assertions);
-                
+
                 // Datenbankverbindung
                 Class.forName("org.postgresql.Driver");
                 String url = "jdbc:postgresql://localhost:5432/rdb_praktikum";
                 Connection conn = DriverManager.getConnection(url, "henning", "henning");
-                
+
                 // Assertions prüfen
                 CheckAssertions check = new CheckAssertions(conn);
                 String error = check.check(assertions);
                 if(error != null){
                     System.err.println(error);
                 }
-                else{                
+                else{
                     // Assertions speichern
                     InsertAssertions insert = new InsertAssertions(conn);
                     error = insert.insert(assertions);

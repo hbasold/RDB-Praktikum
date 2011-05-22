@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 
 /**
- * 
+ *
  */
 
 /**
@@ -14,7 +14,7 @@ import java.util.Iterator;
 public class InputStreamIterator implements Iterator<Integer> {
     InputStreamReader stream;
     Integer buffer;
-    
+
     InputStreamIterator(InputStreamReader stream_){
         stream = stream_;
         buffer = null;
@@ -39,7 +39,7 @@ public class InputStreamIterator implements Iterator<Integer> {
         buffer = null;
         return buf;
     }
-    
+
     private boolean read() {
         try {
             buffer = new Integer(stream.read());

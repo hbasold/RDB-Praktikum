@@ -6,11 +6,11 @@ public class Assertion {
         this.name = name;
         this.predicate = predicate;
     }
-    
+
     public int line;
     public String name;
     public String predicate;
-    
+
     @Override
     public String toString() {
         // TODO Auto-generated method stub
