@@ -1,0 +1,246 @@
+\documentclass[a4paper]{article}
+\usepackage{a4wide}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{listings}
+
+\title{Praktikum „Integritätsbedingungen“, Phase 2}
+\author{Henning Basold \and Igor Zerr}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{Fehlerhafte Assertions}
+
+\subsection{Fehlendes Schlüsselwort „Assertion“}
+\lstinputlisting[language=SQL]{assertions_missing_keyword.asn}
+
+\begin{verbatim}
+Parse error: Parse error at 1:8:
+     Expected token "ASSERTION" but got "H"
+\end{verbatim}
+
+\subsection{Fehlendes Semikolon}
+\lstinputlisting[language=SQL]{assertions_missing_semicolon.asn}
+
+\begin{verbatim}
+Parse error: Parse error at 8:1:
+    Expected ";"
+\end{verbatim}
+
+\subsection{Fehlende schließende Klammer}
+\lstinputlisting[language=SQL]{assertions_missing_close_paren.asn}
+
+\begin{verbatim}
+Error in assertion HOUSE_STREET_DISJOINT on line 1: 
+    error in predicate at position 132: Syntaxfehler am Ende der Eingabe
+\end{verbatim}
+
+\begin{verbatim}
+\end{verbatim}
+
+\subsection{Syntaktisch inkorrekter Bezeichner}
+\lstinputlisting[language=SQL]{assertions_invalid_identifier.asn}
+
+\begin{verbatim}
+Parse error: Parse error at 1:18:
+    Expected identifier but got "1234"
+\end{verbatim}
+
+\subsection{Schlüsselwort als Bezeichner}
+\lstinputlisting[language=SQL]{assertions_keyword_identifier.asn}
+
+\begin{verbatim}
+Error in assertion select on line 1: 
+    "select" is an invalid SQL identifier
+\end{verbatim}
+
+\subsection{Syntaktisch ungültiges Prädikat}
+\lstinputlisting[language=SQL]{assertions_invalid_predicate.asn}
+
+\begin{verbatim}
+Error in assertion HOUSE_STREET_DISJOINT on line 1: 
+    syntactic error in predicate at position 32 near "CREATE".
+\end{verbatim}
+
+\subsection{Fehlende Tabelle in Prädikat}
+\lstinputlisting[language=SQL]{assertions_missing_table.asn}
+
+\begin{verbatim}
+Error in assertion HOUSE_STREET_DISJOINT on line 1: 
+    error in predicate at position 67: Relation "xyz" does not exist.
+\end{verbatim}
+
+\subsection{Fehlende Spalte in Prädikat}
+\lstinputlisting[language=SQL]{assertions_missing_column.asn}
+
+\begin{verbatim}
+Error in assertion HOUSE_STREET_DISJOINT on line 1: 
+    error in predicate at position 110: Spalte "h.xyz" does not exist.
+\end{verbatim}
+
+\subsection{Ungültiger Operator in Prädikat}
+\lstinputlisting[language=SQL]{assertions_invalid_operator.asn}
+
+\begin{verbatim}
+Error in assertion invPred on line 1: 
+    error in predicate at position 120: Operator existiert nicht: path ?+ path
+  Hinweis: Kein Operator stimmt mit dem angegebenen Namen und den Argumenttypen überein.
+  Sie müssen möglicherweise ausdrückliche Typumwandlungen hinzufügen.
+\end{verbatim}
+
+\subsection{Mehrfaches Einfügen}
+
+Die erste Assertion ist bereits in der Datenbank eingetragen, hat
+aber das gleiche Prädikat. Die zweite hat ein anderes Prädikat, aber den gleichen
+Namen.
+\lstinputlisting[language=SQL]{assertions_dual_insert.asn}
+
+\begin{verbatim}
+Warning: assertion HOUSE_STREET_DISJOINT on line 1 already exists with same predicate.
+    It is not inserted again.
+Error in assertion HOUSE_STREET_DISJOINT on line 8: 
+    assertion already exists with another predicate.
+\end{verbatim}
+
+\section{Korrekte Assertions}
+\lstinputlisting[language=SQL]{assertions.asn}
+
+\begin{verbatim}
+Warning: assertion HOUSE_STREET_DISJOINT on line 1 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion HOUSE_HOUSE_DISJOINT on line 8 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion HOUSE_LAKE_DISJOINT on line 15 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion STREET_LAKE_DISJOINT on line 22 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion STREET_LANDUSE_DISJOINT on line 29 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion STREET_PLAYGROUND_DISJOINT on line 36 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion NO_STANDALONE_STOP on line 43 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion TRAFFIC_LIGHT_AT_STREET on line 53 already exists with same predicate.
+    It is not inserted again.
+Warning: assertion PARKING_REACHABLE on line 63 already exists with same predicate.
+    It is not inserted again.
+Assertions have been successfully checked and saved.
+\end{verbatim}
+
+Datenbankinhalt:
+
+\begin{lstlisting}[breaklines=true]
+pg_dump -a -t AssertionSysRel rdb_praktikum
+
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = off;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET escape_string_warning = off;
+
+SET search_path = public, pg_catalog;
+
+--
+-- Data for Name: assertionsysrel; Type: TABLE DATA; Schema: public; Owner: ***
+--
+
+COPY assertionsysrel (assertionname, bedingung, implementiert) FROM stdin;
+HOUSE_STREET_DISJOINT	NOT EXISTS ( SELECT * FROM\n        Haus AS h, Strasse AS s\n        WHERE path(h.umriss) ?# s.verlauf\n    )	f
+HOUSE_HOUSE_DISJOINT	NOT EXISTS ( SELECT * FROM\n        Haus AS h1, Haus AS h2\n        WHERE h1.umriss && h2.umriss\n    )	f
+HOUSE_LAKE_DISJOINT	NOT EXISTS ( SELECT * FROM\n        Haus AS h, See AS l\n        WHERE h.umriss && l.umriss\n    )	f
+STREET_LAKE_DISJOINT	NOT EXISTS ( SELECT * FROM\n        Strasse AS s, See AS l\n        WHERE s.verlauf ?# path(l.umriss)\n    )	f
+STREET_LANDUSE_DISJOINT	NOT EXISTS ( SELECT * FROM\n        Strasse AS s, Landnutzung AS l\n        WHERE s.verlauf ?# path(l.umriss)\n    )	f
+STREET_PLAYGROUND_DISJOINT	NOT EXISTS ( SELECT * FROM\n        Strasse AS s, Spielplatz AS p\n        WHERE s.verlauf ?# path(p.umriss)\n    )	f
+NO_STANDALONE_STOP	NOT EXISTS ( SELECT * FROM\n        Haltestelle AS b\n        WHERE NOT EXISTS ( SELECT * FROM\n            Strasse AS s\n            WHERE approx_circle(b.position, 1) ?# s.verlauf\n        )\n    )f
+TRAFFIC_LIGHT_AT_STREET	NOT EXISTS ( SELECT * FROM\n        Ampel AS t\n        WHERE NOT EXISTS ( SELECT * FROM\n            Strasse AS s\n            WHERE approx_circle(t.position, 1) ?# s.verlauf\n        )\n    )	f
+PARKING_REACHABLE	NOT EXISTS ( SELECT * FROM\n        Parkplatz AS p\n        WHERE NOT EXISTS ( SELECT * FROM\n            Strasse AS s\n            WHERE approx_circle(p.position, 1) ?# s.verlauf\n        )\n    )	f
+\.
+
+
+--
+-- PostgreSQL database dump complete
+--
+\end{lstlisting}
+
+\section{Prüfung der Bezeichner}
+
+\subsection{Prüfung beim Parsen}
+\begin{lstlisting}[language=java,mathescape=true]
+
+identifierPattern = Pattern.compile("[_a-zA-Z][_a-zA-Z0-9]*");
+
+$\vdots$
+
+private String parseIndentifier(InputStreamIterator in) throws AssertionParseError {
+    int oldLine = line;
+    int oldColumn = column;
+
+    StringBuffer word = new StringBuffer();
+
+    if(!isWS(next)){
+        word.appendCodePoint(next.intValue());
+    }
+
+    while(in.hasNext()) {
+        nextChar(in);
+        if(!isWS(next)){
+            word.appendCodePoint(next.intValue());
+        }
+        else{
+            break;
+        }
+    }
+
+    Matcher idMatcher = identifierPattern.matcher(word);
+    if(idMatcher.matches()){
+        return word.toString();
+    }
+    else{
+        throw new AssertionParseError("Expected identifier but got \""
+                                        + word + "\"", oldLine, oldColumn);
+    }
+}
+\end{lstlisting}
+
+\subsection{Prüfung auf Verträglichkeit mit SQL}
+\begin{lstlisting}[language=java,mathescape=true,escapechar=\%]
+
+syntaxErrorParser
+    = Pattern.compile(".* Syntaxfehler bei %\frqq%(.*)%\flqq%\\s+ Position: (\\d+).*");
+
+$\vdots$
+
+private String checkName(String name) throws SQLException {
+    Statement create = sql.createStatement();
+    try {
+        create.executeUpdate("CREATE TABLE " + name + " (Attribut INTEGER)");
+        create.executeUpdate("DROP TABLE " + name);
+    }
+    catch (SQLException e) {
+        // Leider funktionieren die Fehlercodes etc.
+        // mit dem Postgres-Backend scheinbar nicht...
+        Matcher m = syntaxErrorParser.matcher(e.getMessage());
+        if(m.matches()){
+            return "\"" + name + "\" is an invalid SQL identifier";
+        }
+        else{
+            throw e;
+        }
+    }
+    finally {
+        create.close();
+    }
+
+    return null;
+}
+\end{lstlisting}
+
+\end{document}

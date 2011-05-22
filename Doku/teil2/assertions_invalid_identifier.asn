@@ -1,0 +1,7 @@
+CREATE ASSERTION 1234 CHECK (
+    NOT EXISTS ( SELECT * FROM
+        Haus AS h, Strasse AS s
+        WHERE path(h.umriss) ?# s.verlauf
+    )
+);
+
