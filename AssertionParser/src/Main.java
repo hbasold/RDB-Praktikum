@@ -28,8 +28,7 @@ public class Main {
                 FileReader input = new FileReader(args[0]);
                 AssertionParser parser = new AssertionParser();
                 Vector<Assertion> assertions = parser.parse(input);
-                System.out.println(assertions);
-
+                
                 // Datenbankverbindung
                 Class.forName("org.postgresql.Driver");
                 String url = "jdbc:postgresql://localhost:5432/rdb_praktikum";
@@ -48,6 +47,10 @@ public class Main {
                     if(error != null){
                         System.err.println(error);
                     }
+                }
+                
+                if(error == null){
+                    System.out.println("Assertions have been successfully checked and saved.");
                 }
             }
             catch (FileNotFoundException e) {

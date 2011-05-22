@@ -21,7 +21,7 @@ public class CheckAssertions {
 
     private final String syntaxErrorString = ".* Syntaxfehler bei »(.*)«\\s+ Position: (\\d+).*";
     private final String notExistsErrorPattern = ".* (\\w+) »?([\\w.]+)«? existiert nicht\\s+ Position: (\\d+).*";
-    private final String errorPattern = "FEHLER: ((?:.|\\s)*)";
+    private final String errorPattern = "FEHLER: ((?:.|\\s)*) Position: (\\d+).*";
 
     Connection sql;
     Pattern syntaxErrorParser;
@@ -69,7 +69,7 @@ public class CheckAssertions {
         }
 
         if(error != null){
-            error = "Error in assertion " + a.name + " on line " + a.line + ": \n\t" + error + ".";
+            error = "Error in assertion " + a.name + " on line " + a.line + ": \n\t" + error;
         }
 
         return error;
@@ -108,17 +108,17 @@ public class CheckAssertions {
             String error = e.getMessage();
             Matcher m = syntaxErrorParser.matcher(error);
             if(m.matches()){
-                return "syntactic error in predicate at position " + m.group(2) + " near \"" + m.group(1) + "\"";
+                return "syntactic error in predicate at position " + m.group(2) + " near \"" + m.group(1) + "\".";
             }
             else {
                 m = notExistsErrorParser.matcher(error);
                 if(m.matches()){
-                    return "error in predicate at position " + m.group(3) + ": " + m.group(1) + " \"" + m.group(2) + "\" does not exist";
+                    return "error in predicate at position " + m.group(3) + ": " + m.group(1) + " \"" + m.group(2) + "\" does not exist.";
                 }
                 else{
                     m = errorParser.matcher(error);
                     if(m.matches()){
-                        return m.group(1);
+                        return "error in predicate at position " + m.group(2) + ": " + m.group(1);
                     }
                     else{
                         throw e;
