@@ -1,0 +1,139 @@
+\documentclass[a4paper]{article}
+\usepackage{a4wide}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{listings}
+
+\title{Praktikum „Integritätsbedingungen“, Phase 3}
+\author{Henning Basold \and Igor Zerr}
+\date{\today}
+\begin{document}
+\maketitle
+
+\section{Generierte Funktionen und Trigger}
+
+\subsection{HOUSE\_HOUSE\_DISJOINT}
+\begin{lstlisting}[language=sql]
+CREATE ASSERTION HOUSE_HOUSE_DISJOINT CHECK (
+    NOT EXISTS ( SELECT * FROM
+        Haus AS h1, Haus AS h2
+        WHERE h1.umriss && h2.umriss
+    )
+);
+\end{lstlisting}
+
+\begin{lstlisting}[language=sql]
+CREATE FUNCTION check_house_house_disjoint() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$Declare res RECORD;
+BEGIN
+  SELECT INTO res COUNT(*) AS num
+  FROM TestSysRel
+  WHERE NOT (
+    NOT EXISTS ( SELECT * FROM
+        Haus AS h1, Haus AS h2
+        WHERE h1.umriss && h2.umriss
+    )
+  )
+;  IF (res.num > 0)
+  THEN RAISE EXCEPTION
+    'ASSERTION CHECK_HOUSE_HOUSE_DISJOINT violated!';
+  END IF;
+  RETURN NEW;
+END;$$;
+
+CREATE TRIGGER check_house_house_disjoint_haus
+    AFTER INSERT OR DELETE OR UPDATE ON haus
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_house_house_disjoint();
+
+CREATE TRIGGER check_house_lake_disjoint_haus
+    AFTER INSERT OR DELETE OR UPDATE ON haus
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_house_lake_disjoint();
+
+\end{lstlisting}
+
+\subsection{NO\_STANDALONE\_STOP}
+\begin{lstlisting}[language=sql]
+CREATE ASSERTION NO_STANDALONE_STOP CHECK (
+    NOT EXISTS ( SELECT * FROM
+        Haltestelle AS b
+        WHERE NOT EXISTS ( SELECT * FROM
+            Strasse AS s
+            WHERE approx_circle(b.position, 1) ?# s.verlauf
+        )
+    )
+);
+\end{lstlisting}
+
+\begin{lstlisting}[language=sql]
+CREATE FUNCTION check_no_standalone_stop() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$Declare res RECORD;
+BEGIN
+  SELECT INTO res COUNT(*) AS num
+  FROM TestSysRel
+  WHERE NOT (
+    NOT EXISTS ( SELECT * FROM
+        Haltestelle AS b
+        WHERE NOT EXISTS ( SELECT * FROM
+            Strasse AS s
+            WHERE approx_circle(b.position, 1) ?# s.verlauf
+        )
+    )
+  )
+;  IF (res.num > 0)
+  THEN RAISE EXCEPTION
+    'ASSERTION CHECK_NO_STANDALONE_STOP violated!';
+  END IF;
+  RETURN NEW;
+END;$$;
+
+CREATE TRIGGER check_no_standalone_stop_haltestelle
+    AFTER INSERT OR DELETE OR UPDATE ON haltestelle
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_no_standalone_stop();
+
+CREATE TRIGGER check_no_standalone_stop_strasse
+    AFTER INSERT OR DELETE OR UPDATE ON strasse
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_no_standalone_stop();
+
+\end{lstlisting}
+
+\section{Datenimport}
+
+\section{Bestimmen der betroffenen Relationen}
+
+\begin{lstlisting}[language=java]
+Set<String>
+getAffectedTables(Connection sql, Assertion a) throws SQLException {
+    Pattern tableExtraction
+        = Pattern.compile(".* Scan.* on (\\w+) .*");
+    
+    Set<String> affectedTables
+        = new CopyOnWriteArraySet<String>();
+
+    Statement check = sql.createStatement();
+    ResultSet pred
+        = check.executeQuery(
+            "EXPLAIN SELECT * FROM TestSysRel WHERE " + a.predicate);                
+    while(pred.next()){
+        Matcher match
+            = tableExtraction.matcher(pred.getString("QUERY PLAN"));
+        if(match.find()){
+            String table = match.group(1);
+            if(!table.equalsIgnoreCase("TestSysRel")){
+                affectedTables.add(table);
+            }
+        }
+    }
+    
+    return affectedTables;
+}
+\end{lstlisting}
+
+\end{document}
