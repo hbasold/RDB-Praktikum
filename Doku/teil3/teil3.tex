@@ -19,7 +19,7 @@
 CREATE ASSERTION HOUSE_HOUSE_DISJOINT CHECK (
     NOT EXISTS ( SELECT * FROM
         Haus AS h1, Haus AS h2
-        WHERE h1.umriss && h2.umriss
+        WHERE h1.id <> h2.id and h1.umriss && h2.umriss
     )
 );
 \end{lstlisting}
@@ -34,7 +34,7 @@ BEGIN
   WHERE NOT (
     NOT EXISTS ( SELECT * FROM
         Haus AS h1, Haus AS h2
-        WHERE h1.umriss && h2.umriss
+        WHERE h1.id <> h2.id and h1.umriss && h2.umriss
     )
   )
 ;  IF (res.num > 0)
