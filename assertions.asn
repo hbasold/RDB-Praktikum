@@ -45,7 +45,7 @@ CREATE ASSERTION NO_STANDALONE_STOP CHECK (
         Haltestelle AS b
         WHERE NOT EXISTS ( SELECT * FROM
             Strasse AS s
-            WHERE approx_circle(b.position, r) ?# s.verlauf
+            WHERE approx_circle(b.position, 1) ?# s.verlauf
         )
     )
 );
@@ -66,7 +66,7 @@ CREATE ASSERTION TRAFFIC_LIGHT_AT_STREET CHECK (
         Ampel AS t
         WHERE NOT EXISTS ( SELECT * FROM
             Strasse AS s
-            WHERE approx_circle(t.position, r) ?# s.verlauf
+            WHERE approx_circle(t.position, 1) ?# s.verlauf
         )
     )
 );
