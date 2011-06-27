@@ -105,6 +105,59 @@ CREATE TRIGGER check_no_standalone_stop_strasse
 \end{lstlisting}
 
 \section{Datenimport}
+\subsection{Übersicht}
+
+\begin{verbatim}
+Inserted Tuples:
+    Tunnel: 48
+    Park: 30
+    Strassenbahn: 55
+    Spielplatz: 24
+    Strasse: 1150
+    Fluss: 7
+    Parkplatz: 22
+    Eisenbahn: 55
+    See: 5
+    Bruecke: 47
+    Haus: 2205
+    Landnutzung: 70
+Total: 3718
+
+Violated Assertions:
+    CHECK_STREET_PLAYGROUND_DISJOINT: 1
+    CHECK_PARKING_REACHABLE: 43
+    CHECK_STREET_LANDUSE_DISJOINT: 74
+    CHECK_NO_STANDALONE_STOP: 167
+    CHECK_HOUSE_STREET_DISJOINT: 11
+    CHECK_TRAFFIC_LIGHT_AT_STREET: 223
+    CHECK_HOUSE_HOUSE_DISJOINT: 1604
+    CHECK_HOUSE_LAKE_DISJOINT: 0
+\end{verbatim}
+
+\subsection{Nicht verletzte Assertions}
+
+\subsubsection{HOUSE\_STREET\_DISJOINT}
+SQL Verletzung: 
+\begin{lstlisting}[language=sql,breaklines=true]
+INSERT INTO Haus (id,umriss, hausnummer, strasse, ort, plz, nutzung) values('3457842','((52.2658021,10.5088862),(52.2658321,10.5082349))','42','Kasernenstrasse','Braunschweig','38102',NULL)
+\end{lstlisting}
+
+\subsubsection{HOUSE\_LAKE\_DISJOINT}
+SQL Verletzung:
+\begin{lstlisting}[language=sql,breaklines=true]
+INSERT INTO Haus (id,umriss, hausnummer, strasse, ort, plz, nutzung) values('3457843','((52.2593691,10.530547),(52.2593475,10.5305934),(52.2593108,10.530598),(52.2592873,10.5305653),(52.2592827,10.5305139),(52.2592984,10.5304732),(52.2593168,10.5304591),(52.2593452,10.5304646),(52.2593669,10.5305019),(52.2593691,10.530547))','42','Kasernenstrasse','Braunschweig','38102',NULL)
+\end{lstlisting}
+
+\subsubsection{STREET\_LAKE\_DISJOINT}
+SQL Verletzung: 
+\begin{lstlisting}[language=sql,breaklines=true]
+INSERT INTO Strasse (id,verlauf,strassentyp,name,maxV) values('23251939','[(52.2601605,10.5313293),(52.2601389,10.5313757),(52.2601022,10.5313803),(52.2600787,10.5313476),(52.2600742,10.5312962),(52.2600898,10.5312555),(52.2601082,10.5312414),(52.2601366,10.5312469),(52.2601583,10.5312842),(52.2601605,10.5313293)]','residential','Neue Knochenhauerstrasse','0')
+\end{lstlisting}
+
+\subsubsection{WATER\_CROSSING}
+\begin{lstlisting}[language=sql,breaklines=true]
+INSERT INTO Bruecke (id,verlauf,name,maxV) values('3457844','[(52.2674258,10.5246387),(52.2669683,10.5250233)]','Leonhardstrasse','30')
+\end{lstlisting}
 
 \section{Bestimmen der betroffenen Relationen}
 
