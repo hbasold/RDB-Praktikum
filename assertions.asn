@@ -56,7 +56,7 @@ CREATE ASSERTION WATER_CROSSING CHECK (
         JOIN Fluss AS r ON s.verlauf ?# r.verlauf
         WHERE NOT EXISTS ( SELECT * FROM
             Bruecke AS b
-            WHERE (b.verlauf && (s.verlauf # r.verlauf)
+            WHERE (b.verlauf && (s.verlauf # r.verlauf))
         )
     )
 );
