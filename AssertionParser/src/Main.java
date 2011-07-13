@@ -2,10 +2,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import triggerGeneration.TriggerGenerator;
 import assertionInsertion.AssertionInserter;
-
-
-
 
 public class Main {
 
@@ -21,12 +19,13 @@ public class Main {
                 // Datenbankverbindung
                 Class.forName("org.postgresql.Driver");
                 String url = "jdbc:postgresql://localhost:5432/rdb_praktikum";
-                Connection conn = DriverManager.getConnection(url, "henning", "henning");
+                Connection sql = DriverManager.getConnection(url, "henning", "henning");
 
-                String error = AssertionInserter.insertAssertions(args[0], conn);
+                String error = AssertionInserter.insertAssertions(args[0], sql);
 
                 if(error == null){
                     System.out.println("Assertions have been successfully checked and saved.");
+                    TriggerGenerator.createAssertions(sql);
                 }
                 else{
                     System.err.println(error);
