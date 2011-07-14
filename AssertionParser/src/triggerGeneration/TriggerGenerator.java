@@ -23,44 +23,60 @@ public class TriggerGenerator {
         Vector<Assertion> assertions = getAssertions(sql);
 
         for(Assertion a : assertions){
-            if(!a.implemented){
-                // Betroffene Relationen holen
-                Set<String> affectedTables = getAffectedTables(sql, a);
+            createAssertion(sql, a);
+        }
+    }
 
-                System.out.println(a.name + ": ");
-                for(String t : affectedTables){
-                    System.out.println("\t" + t);
+    /**
+     * @param sql
+     * @param a
+     * @return
+     * @throws SQLException
+     */
+    public static String createAssertion(Connection sql, Assertion a)
+            throws SQLException {
+
+        String error = null;
+
+        if(!a.implemented){
+            // Betroffene Relationen holen
+            Set<String> affectedTables = getAffectedTables(sql, a);
+
+            System.out.println(a.name + ": ");
+            for(String t : affectedTables){
+                System.out.println("\t" + t);
+            }
+
+            sql.setAutoCommit(false);
+
+            try {
+                // Funktion für Assertion einfügen
+                createFunction(a, sql);
+
+                // Trigger für die Relationen erzeugen
+                createTriggers(a, affectedTables, sql);
+
+                // Status auf "implementiert" setzen
+                Statement setImplemented = sql.createStatement();
+                if(setImplemented.executeUpdate(
+                        "UPDATE AssertionSysRel SET implementiert = true " +
+                        "WHERE Assertionname = '" + a.name + "'")
+                        == 1){
+                    sql.commit();
                 }
-
-                sql.setAutoCommit(false);
-
-                try {
-                    // Funktion für Assertion einfügen
-                    createFunction(a, sql);
-
-                    // Trigger für die Relationen erzeugen
-                    createTriggers(a, affectedTables, sql);
-
-                    // Status auf "implementiert" setzen
-                    Statement setImplemented = sql.createStatement();
-                    if(setImplemented.executeUpdate(
-                            "UPDATE AssertionSysRel SET implementiert = true " +
-                            "WHERE Assertionname = '" + a.name + "'")
-                            == 1){
-                        sql.commit();
-                    }
-                    else{
-                        System.err.println("Could not update assertion " + a.name);
-                    }
-                }
-                catch (SQLException e) {
-                    System.err.println("Database error: " + e.getMessage());
-                }
-                finally {
-                    sql.setAutoCommit(true);
+                else{
+                    error = "Could not update assertion " + a.name;
                 }
             }
+            catch (SQLException e) {
+                error = "Database error: " + e.getMessage();
+            }
+            finally {
+                sql.setAutoCommit(true);
+            }
         }
+
+        return error;
     }
 
     /**
