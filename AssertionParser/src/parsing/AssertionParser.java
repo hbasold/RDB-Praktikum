@@ -4,6 +4,9 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import assertionAction.AssertionAction;
+import assertionAction.InsertAssertion;
+
 /**
  * @author henning
  *
@@ -20,8 +23,8 @@ public class AssertionParser {
         identifierPattern = Pattern.compile("[_a-zA-Z][_a-zA-Z0-9]*");
     }
 
-    public Vector<Assertion> parse(InputStreamReader input) throws AssertionParseError {
-        Vector<Assertion> asserts = new Vector<Assertion>();
+    public Vector<AssertionAction> parse(InputStreamReader input) throws AssertionParseError {
+        Vector<AssertionAction> asserts = new Vector<AssertionAction>();
 
         InputStreamIterator in = new InputStreamIterator(input);
         next = null;
@@ -48,7 +51,7 @@ public class AssertionParser {
      * @return
      * @throws AssertionParseError
      */
-    private Assertion parseAssertion(InputStreamIterator in) throws AssertionParseError {
+    private AssertionAction parseAssertion(InputStreamIterator in) throws AssertionParseError {
         skipWS(in);
 
         int startLine = line;
@@ -87,7 +90,7 @@ public class AssertionParser {
         skipWS(in);
         parseLiteral(";", in);
 
-        return new Assertion(startLine, identifier, predicate);
+        return new InsertAssertion(new Assertion(startLine, identifier, predicate));
     }
 
     private void skipWS(InputStreamIterator in) {

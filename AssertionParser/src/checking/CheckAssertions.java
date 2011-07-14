@@ -62,7 +62,7 @@ public class CheckAssertions {
         return null;
     }
 
-    private String checkAssertion(Assertion a) throws SQLException {
+    public String checkAssertion(Assertion a) throws SQLException {
         String error = checkName(a.name);
         if(error == null){
             error = checkPredicate(a.predicate);

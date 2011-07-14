@@ -51,7 +51,7 @@ public class InsertAssertions {
         return null;
     }
 
-    private String insertAssertion(Assertion a) throws SQLException {
+    public String insertAssertion(Assertion a) throws SQLException {
         String error = insertAssertion_(a);
         if(error != null){
             error = "Error in assertion " + a.name + " on line " + a.line + ": \n    " + error + ".";

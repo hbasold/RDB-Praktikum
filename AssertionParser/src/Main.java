@@ -1,12 +1,19 @@
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Vector;
+
+import parsing.AssertionParseError;
+import parsing.AssertionParser;
 
 import triggerGeneration.TriggerGenerator;
-import assertionInsertion.AssertionInserter;
+import assertionAction.ActionExecuter;
+import assertionAction.AssertionAction;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -38,27 +45,45 @@ public class Main {
                 return;
             }
 
-            // Datenbankverbindung
-            Class.forName("org.postgresql.Driver");
-            String url = "jdbc:postgresql://localhost:5432/rdb_praktikum";
-            Connection sql = DriverManager.getConnection(url, "henning", "henning");
+            try {
+                // Datenbankverbindung
+                Class.forName("org.postgresql.Driver");
+                String url = "jdbc:postgresql://localhost:5432/rdb_praktikum";
+                Connection sql = DriverManager.getConnection(url, "henning", "henning");
 
-            String error = AssertionInserter.insertAssertions(assertionFile, sql);
+                // Assertions parsen
+                FileReader input = new FileReader(assertionFile);
+                AssertionParser assertionParser = new AssertionParser();
+                Vector<AssertionAction> assertions = assertionParser.parse(input);
 
-            if(error == null){
-                System.out.println("Assertions have been successfully checked and saved.");
-                TriggerGenerator.createAssertions(sql);
+                ActionExecuter executer = new ActionExecuter(sql);
+                String error = executer.check(assertions);
+
+                if(error == null){
+                    System.out.println("Assertion actions have been successfully checked.");
+                    error = executer.exec(assertions);
+                    if(error == null){
+                        System.out.println("Assertion actions have been successfully executed.");
+                        TriggerGenerator.createAssertions(sql);
+                        System.out.println("Trigger have been successfully generated.");
+                    }
+                }
+                else{
+                    System.err.println(error);
+                }
             }
-            else{
-                System.err.println(error);
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
-        }
-        catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (SQLException e) {
-            System.err.println("Database error: " + e.getMessage());
+            catch (SQLException e) {
+                System.err.println("Database error: " + e.getMessage());
+            }
+            catch (FileNotFoundException e) {
+                System.err.println("Could not open file \"" + assertionFile + "\": " + e.getMessage());
+            }
+            catch (AssertionParseError e) {
+                System.err.println("Parse error: " + e.getMessage());
+            }
         }
         catch (OptionException optionError){
             System.err.println(optionError.getMessage());
