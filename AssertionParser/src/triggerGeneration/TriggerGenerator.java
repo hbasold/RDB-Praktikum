@@ -52,6 +52,7 @@ public class TriggerGenerator {
             try {
                 // Funktion für Assertion einfügen
                 createFunction(a, sql);
+                createFunctionStandalone(a, sql);
 
                 // Trigger für die Relationen erzeugen
                 createTriggers(a, affectedTables, sql);
@@ -132,6 +133,30 @@ public class TriggerGenerator {
         create.executeUpdate(functionString.toString());
     }
 
+    /**
+     * @param a
+     * @param sql
+     * @throws SQLException
+     */
+    private static void createFunctionStandalone(Assertion a, Connection sql) throws SQLException {
+
+        StringBuilder functionString = new StringBuilder();
+        Formatter functionFormatter = new Formatter(functionString);
+        functionFormatter.format(
+                "CREATE FUNCTION check_%1$s_standalone() RETURNS bool " +
+                "AS " +
+                "'SELECT COUNT(*) > 0 AS num " +
+                "  FROM TestSysRel " +
+                "  WHERE NOT ( " +
+                "    %2$s\n " +
+                "  )' " +
+                "LANGUAGE SQL;",
+                a.name, a.predicate);
+
+        Statement create = sql.createStatement();
+        create.executeUpdate(functionString.toString());
+    }
+
     private static Set<String> getAffectedTables(Connection sql, Assertion a) throws SQLException {
         Pattern tableExtraction = Pattern.compile(".* Scan.* on (\\w+) .*");
 
@@ -166,6 +191,7 @@ public class TriggerGenerator {
     public static String drop(Connection sql, String assertionName) throws SQLException {
         Statement drop = sql.createStatement();
         drop.executeUpdate("DROP FUNCTION " + "CHECK_" + assertionName + "() CASCADE" );
+        drop.executeUpdate("DROP FUNCTION " + "check_" + assertionName + "_standalone() CASCADE" );
         return null;
     }
 

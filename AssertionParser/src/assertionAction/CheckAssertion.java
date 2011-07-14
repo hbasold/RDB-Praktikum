@@ -16,14 +16,12 @@ public class CheckAssertion implements AssertionAction {
 
     @Override
     public String doAction(ActionWorker worker) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return worker.checkAssertion(name);
     }
 
     @Override
     public String doCheck(ActionWorker worker) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return worker.checkCheck(name);
     }
 
     @Override

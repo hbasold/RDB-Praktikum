@@ -43,11 +43,11 @@ public class ActionExecuter {
             Statement assertionsQuery = sql.createStatement();
             ResultSet implemented = assertionsQuery.executeQuery("SELECT implementiert FROM AssertionSysRel WHERE Assertionname='" + assertionName + "'");
             if(!implemented.next()){
-                return "Assertion " + assertionName + " nicht vorhanden";
+                return "Assertion not found.";
             }
             else{
                 if(!implemented.getBoolean("implementiert")){
-                    return "Assertion nicht implementiert";
+                    return "Assertion not implemented.";
                 }
                 else{
                     return null;
@@ -63,6 +63,38 @@ public class ActionExecuter {
                 drop.executeUpdate("DELETE FROM AssertionSysRel WHERE Assertionname='" + assertionName + "'");
             }
             return error;
+        }
+
+        public String checkCheck(String assertionName) throws SQLException{
+            Statement assertionsQuery = sql.createStatement();
+            ResultSet implemented = assertionsQuery.executeQuery("SELECT implementiert FROM AssertionSysRel WHERE Assertionname='" + assertionName + "'");
+            if(!implemented.next()){
+                return "Assertion not found.";
+            }
+            else{
+                if(!implemented.getBoolean("implementiert")){
+                    return "Assertion not implemented.";
+                }
+                else{
+                    return null;
+                }
+            }
+        }
+
+        public String checkAssertion(String assertionName) throws SQLException{
+            Statement validationQuery = sql.createStatement();
+            ResultSet valid = validationQuery.executeQuery("SELECT " + "check_" + assertionName + "_standalone() as res");
+            if(!valid.next()){
+                return "Could not check assertion.";
+            }
+            else{
+                if(!valid.getBoolean("res")){
+                    return "Assertion violated.";
+                }
+                else{
+                    return null;
+                }
+            }
         }
     }
 
