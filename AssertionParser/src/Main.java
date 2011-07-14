@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Vector;
 
-import parsing.AssertionParseError;
 import parsing.AssertionParser;
+import parsing.Either;
 
 import assertionAction.ActionExecuter;
 import assertionAction.AssertionAction;
@@ -66,20 +66,25 @@ public class Main {
                 // Assertions parsen
                 FileReader input = new FileReader(assertionFile);
                 AssertionParser assertionParser = new AssertionParser();
-                Vector<AssertionAction> assertions = assertionParser.parse(input);
+                Either<String, Vector<AssertionAction>> assertions = assertionParser.parse(input);
 
-                ActionExecuter executer = new ActionExecuter(sql);
-                String error = executer.check(assertions);
-
-                if(error == null){
-                    System.out.println("Assertion actions have been successfully checked.");
-                    error = executer.exec(assertions);
-                    if(error == null){
-                        System.out.println("Assertion actions have been successfully executed.");
-                    }
+                if(assertions.isLeft()){
+                    System.err.println("Parse error: " + assertions.left());
                 }
                 else{
-                    System.err.println(error);
+                    ActionExecuter executer = new ActionExecuter(sql);
+                    String error = executer.check(assertions.right());
+
+                    if(error == null){
+                        System.out.println("Assertion actions have been successfully checked.");
+                        error = executer.exec(assertions.right());
+                        if(error == null){
+                            System.out.println("Assertion actions have been successfully executed.");
+                        }
+                    }
+                    else{
+                        System.err.println(error);
+                    }
                 }
             }
             catch (ClassNotFoundException e) {
@@ -90,9 +95,6 @@ public class Main {
             }
             catch (FileNotFoundException e) {
                 System.err.println("Could not open file \"" + assertionFile + "\": " + e.getMessage());
-            }
-            catch (AssertionParseError e) {
-                System.err.println("Parse error: " + e.getMessage());
             }
         }
         catch (OptionException optionError){

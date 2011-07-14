@@ -78,7 +78,7 @@ public class AssertionParser {
         writeBacktrack = null;
     }
 
-    public Vector<AssertionAction> parse(InputStreamReader input) throws AssertionParseError {
+    public Either<String, Vector<AssertionAction>> parse(InputStreamReader input) {
         Vector<AssertionAction> asserts = new Vector<AssertionAction>();
 
         InputStreamIterator in = new InputStreamIterator(input);
@@ -90,18 +90,28 @@ public class AssertionParser {
             nextChar(in);
         }
         else{
-            throw new AssertionParseError("input", "nothing", "nothing", line, column);
+            return Either.Left("empty input").get();
         }
 
         while(hasNext(in)){
-            asserts.add(parseAction(in));
+            Either<Vector<AssertionParseError>, AssertionAction> act = parseAction(in);
+            if(act.isLeft()){
+                String errorText = "error while parsing alternatives :";
+                for(AssertionParseError e : act.left()){
+                    errorText = errorText + "\n" +  e.getMessage();
+                }
+                return Either.Left(errorText).get();
+            }
+            else{
+                asserts.add(act.right());
+            }
             skipWS(in);
         }
 
-        return asserts;
+        return Either.Right(asserts).get();
     }
 
-    private AssertionAction parseAction(InputStreamIterator in){
+    private Either<Vector<AssertionParseError>, AssertionAction> parseAction(InputStreamIterator in){
         AssertionAction action = null;
         Vector<AssertionParseError> errors = new Vector<AssertionParseError>();
 
@@ -126,6 +136,16 @@ public class AssertionParser {
 
             if(action == null){
                 backtrackAlternative();
+                startAlternative();
+                try {
+                    action = parseCheckAssertion(in);
+                }
+                catch (AssertionParseError e) {
+                    errors.add(e);
+                }
+                if(action == null){
+                    return Either.Left(errors).get();
+                }
             }
             else{
                 endAlternative();
@@ -135,7 +155,7 @@ public class AssertionParser {
             endAlternative();
         }
 
-        return action;
+        return Either.Right(action).get();
     }
 
     private AssertionAction parseCheckAssertion(InputStreamIterator in) throws AssertionParseError {
