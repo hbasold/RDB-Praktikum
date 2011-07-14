@@ -11,7 +11,6 @@ import java.util.Vector;
 import parsing.AssertionParseError;
 import parsing.AssertionParser;
 
-import triggerGeneration.TriggerGenerator;
 import assertionAction.ActionExecuter;
 import assertionAction.AssertionAction;
 
@@ -77,8 +76,6 @@ public class Main {
                     error = executer.exec(assertions);
                     if(error == null){
                         System.out.println("Assertion actions have been successfully executed.");
-                        TriggerGenerator.createAssertions(sql);
-                        System.out.println("Trigger have been successfully generated.");
                     }
                 }
                 else{

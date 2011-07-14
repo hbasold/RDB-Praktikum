@@ -16,7 +16,11 @@ public class InsertAssertion implements AssertionAction {
 
     @Override
     public String doAction(ActionWorker worker) throws SQLException {
-        return worker.insert(a);
+        String error = worker.insert(a);
+        if(error == null){
+            error = worker.create(a);
+        }
+        return error;
     }
 
     @Override
@@ -28,7 +32,7 @@ public class InsertAssertion implements AssertionAction {
     public String describe() {
         return "INSERT ASSERTION " + a.name;
     }
-    
+
     @Override
     public String toString() {
         return describe();

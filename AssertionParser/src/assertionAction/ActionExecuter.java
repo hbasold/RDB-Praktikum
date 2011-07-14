@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.Vector;
 
 import parsing.Assertion;
+import triggerGeneration.TriggerGenerator;
 
 import checking.CheckAssertions;
 import checking.InsertAssertions;
@@ -12,10 +13,12 @@ import checking.InsertAssertions;
 public class ActionExecuter {
 
     public static class ActionWorker {
+        private Connection sql;
         private CheckAssertions check;
         private InsertAssertions insert;
 
         public ActionWorker(Connection sql) throws SQLException {
+            this.sql = sql;
             check = new CheckAssertions(sql);
             insert = new InsertAssertions(sql);
         }
@@ -27,6 +30,10 @@ public class ActionExecuter {
         public String insert(Assertion a) throws SQLException{
             // Assertions speichern
             return insert.insertAssertion(a);
+        }
+
+        public String create(Assertion a) throws SQLException {
+            return TriggerGenerator.createAssertion(sql, a);
         }
     }
 
