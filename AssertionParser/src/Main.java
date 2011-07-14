@@ -81,6 +81,9 @@ public class Main {
                         if(error == null){
                             System.out.println("Assertion actions have been successfully executed.");
                         }
+                        else{
+                            System.err.println(error);
+                        }
                     }
                     else{
                         System.err.println(error);

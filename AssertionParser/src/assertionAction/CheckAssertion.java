@@ -28,7 +28,7 @@ public class CheckAssertion implements AssertionAction {
 
     @Override
     public String describe() {
-        return "CHECK ASSERTION " + name;
+        return "CHECK ASSERTION " + name + " (line " + line + ")";
     }
 
     @Override

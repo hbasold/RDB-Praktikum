@@ -163,4 +163,10 @@ public class TriggerGenerator {
         return as;
     }
 
+    public static String drop(Connection sql, String assertionName) throws SQLException {
+        Statement drop = sql.createStatement();
+        drop.executeUpdate("DROP FUNCTION " + "CHECK_" + assertionName + "() CASCADE" );
+        return null;
+    }
+
 }

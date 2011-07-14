@@ -4,9 +4,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Vector;
-
 import parsing.Assertion;
+import parsing.Either;
 
 public class InsertAssertions {
 
@@ -41,34 +40,26 @@ public class InsertAssertions {
         }
     }
 
-    public String insert(Vector<Assertion> assertions) throws SQLException {
-        for(Assertion a : assertions){
-            String error = insertAssertion(a);
-            if(error != null){
-                return error;
-            }
-        }
-        return null;
-    }
-
-    public String insertAssertion(Assertion a) throws SQLException {
-        String error = insertAssertion_(a);
-        if(error != null){
-            error = "Error in assertion " + a.name + " on line " + a.line + ": \n    " + error + ".";
+    public Either<String, Boolean> insertAssertion(Assertion a) throws SQLException {
+        Either<String, Boolean> error = insertAssertion_(a);
+        if(error.isLeft()){
+            error = Either.Left("Error in assertion " + a.name + " on line " + a.line + ": \n    " + error.left() + ".").get();
         }
         return error;
     }
 
-    private String insertAssertion_(Assertion a) throws SQLException {
+    private Either<String, Boolean> insertAssertion_(Assertion a) throws SQLException {
         Statement create = sql.createStatement();
 
         try {
             if(isReinsertion(a)){
                 System.out.println("Warning: assertion " + a.name + " on line " + a.line + " already exists with same predicate.\n" +
                                     "    It is not inserted again.");
+                return Either.Right(false).get();
             }
             else{
                 create.executeUpdate("INSERT INTO AssertionSysRel VALUES('" + a.name + "','" + a.predicate + "',false)");
+                return Either.Right(true).get();
             }
         }
         catch (SQLException e) {
@@ -76,14 +67,12 @@ public class InsertAssertions {
             String error = e.getMessage();
             if(error.equals(doubleEntryErrorString)){
                 if(!isReinsertion(a)){
-                    return "assertion already exists with another predicate";
+                    return Either.Left("assertion already exists with another predicate").get();
                 }
             }
 
             throw e;
         }
-
-        return null;
     }
 
     private boolean isReinsertion(Assertion a) throws SQLException {

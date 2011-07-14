@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import assertionAction.AssertionAction;
 import assertionAction.CheckAssertion;
+import assertionAction.DropAssertion;
 import assertionAction.InsertAssertion;
 
 /**
@@ -138,7 +139,7 @@ public class AssertionParser {
                 backtrackAlternative();
                 startAlternative();
                 try {
-                    action = parseCheckAssertion(in);
+                    action = parseDropAssertion(in);
                 }
                 catch (AssertionParseError e) {
                     errors.add(e);
@@ -156,6 +157,26 @@ public class AssertionParser {
         }
 
         return Either.Right(action).get();
+    }
+
+    private AssertionAction parseDropAssertion(InputStreamIterator in) throws AssertionParseError {
+        skipWS(in);
+
+        int startLine = line;
+
+        parseLiteral("DROP", in);
+
+        skipWS(in);
+        parseLiteral("ASSERTION", in);
+
+        skipWS(in);
+
+        String identifier = parseIndentifier(in);
+
+        skipWS(in);
+        parseLiteral(";", in);
+
+        return new DropAssertion(startLine, identifier);
     }
 
     private AssertionAction parseCheckAssertion(InputStreamIterator in) throws AssertionParseError {

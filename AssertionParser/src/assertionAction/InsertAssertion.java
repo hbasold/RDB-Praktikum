@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import assertionAction.ActionExecuter.ActionWorker;
 
 import parsing.Assertion;
+import parsing.Either;
 
 public class InsertAssertion implements AssertionAction {
 
@@ -16,11 +17,12 @@ public class InsertAssertion implements AssertionAction {
 
     @Override
     public String doAction(ActionWorker worker) throws SQLException {
-        String error = worker.insert(a);
-        if(error == null){
-            error = worker.create(a);
+        Either<String, Boolean> error = worker.insert(a);
+
+        if(error.isRight() && error.right() == true){
+            return worker.create(a);
         }
-        return error;
+        return error.isLeft() ? error.left() : null;
     }
 
     @Override

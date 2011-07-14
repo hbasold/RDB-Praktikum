@@ -1,10 +1,13 @@
 package assertionAction;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Vector;
 
 import parsing.Assertion;
+import parsing.Either;
 import triggerGeneration.TriggerGenerator;
 
 import checking.CheckAssertions;
@@ -27,13 +30,39 @@ public class ActionExecuter {
             return check.checkAssertion(a);
         }
 
-        public String insert(Assertion a) throws SQLException{
+        public Either<String, Boolean> insert(Assertion a) throws SQLException{
             // Assertions speichern
             return insert.insertAssertion(a);
         }
 
         public String create(Assertion a) throws SQLException {
             return TriggerGenerator.createAssertion(sql, a);
+        }
+
+        public String checkDrop(String assertionName) throws SQLException{
+            Statement assertionsQuery = sql.createStatement();
+            ResultSet implemented = assertionsQuery.executeQuery("SELECT implementiert FROM AssertionSysRel WHERE Assertionname='" + assertionName + "'");
+            if(!implemented.next()){
+                return "Assertion " + assertionName + " nicht vorhanden";
+            }
+            else{
+                if(!implemented.getBoolean("implementiert")){
+                    return "Assertion nicht implementiert";
+                }
+                else{
+                    return null;
+                }
+            }
+        }
+
+        public String drop(String assertionName) throws SQLException{
+            String error = TriggerGenerator.drop(sql, assertionName);
+            if(error == null){
+                // drop from AssertionSysRel
+                Statement drop = sql.createStatement();
+                drop.executeUpdate("DELETE FROM AssertionSysRel WHERE Assertionname='" + assertionName + "'");
+            }
+            return error;
         }
     }
 

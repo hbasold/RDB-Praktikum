@@ -65,7 +65,7 @@ CREATE ASSERTION PARKING_REACHABLE CHECK (
         Parkplatz AS p
         WHERE NOT EXISTS ( SELECT * FROM
             Strasse AS s
-            WHERE approx_circle(p.position, 1) ?# s.verlauf
+            WHERE approx_circle(center(circle(p.umriss)), radius(circle(p.umriss)) + 1.0) ?# s.verlauf
         )
     )
 );

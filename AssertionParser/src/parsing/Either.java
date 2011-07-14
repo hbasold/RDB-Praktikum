@@ -53,4 +53,8 @@ public class Either<LEFT, RIGHT> {
     public RIGHT right() {
         return right;
     }
+
+    public boolean isRight() {
+        return right != null;
+    }
 }
