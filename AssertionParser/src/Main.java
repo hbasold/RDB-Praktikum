@@ -76,10 +76,10 @@ public class Main {
                     String error = executer.check(assertions.right());
 
                     if(error == null){
-                        System.out.println("Assertion actions have been successfully checked.");
+                        //System.out.println("Assertion actions have been successfully checked.");
                         error = executer.exec(assertions.right());
                         if(error == null){
-                            System.out.println("Assertion actions have been successfully executed.");
+                            //System.out.println("Assertion actions have been successfully executed.");
                         }
                         else{
                             System.err.println(error);
