@@ -31,6 +31,19 @@ public class Main {
         OptionSpec<File> file
             = parser.accepts( "f", "file" )
                     .withRequiredArg().ofType( File.class ).describedAs( "path to assertion file" );
+        OptionSpec<String> dbName
+            = parser.accepts( "database" )
+                    .withRequiredArg().ofType( String.class ).describedAs( "name of the database" )
+                    .required();
+        OptionSpec<String> dbUser
+            = parser.accepts( "user" )
+                    .withRequiredArg().ofType( String.class ).describedAs( "name of the database user" )
+                    .required();
+        OptionSpec<String> dbPassword
+            = parser.accepts( "password" )
+                    .withRequiredArg().ofType( String.class ).describedAs( "password for database user" )
+                    .required();
+
 
         try {
             OptionSet options = parser.parse(args);
@@ -48,8 +61,8 @@ public class Main {
             try {
                 // Datenbankverbindung
                 Class.forName("org.postgresql.Driver");
-                String url = "jdbc:postgresql://localhost:5432/rdb_praktikum";
-                Connection sql = DriverManager.getConnection(url, "henning", "henning");
+                String url = "jdbc:postgresql://localhost:5432/" + dbName.value(options);
+                Connection sql = DriverManager.getConnection(url, dbUser.value(options), dbPassword.value(options));
 
                 // Assertions parsen
                 FileReader input = new FileReader(assertionFile);
