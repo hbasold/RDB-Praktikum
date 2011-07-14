@@ -116,7 +116,7 @@ public class Database {
 	}
 
 
-	private void cleanDatabase() {
+	public void cleanDatabase() {
 		PreparedStatement prepared;
 		try {
 			prepared = conn.prepareStatement("Delete from strassenbahn");

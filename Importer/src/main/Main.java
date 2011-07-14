@@ -44,7 +44,7 @@ public class Main {
 		db.openDatabase(dbName, user, password);
 
 
-		//db.cleanDatabase();
+		db.cleanDatabase();
 		document = readXMLDocument(args[0]);
 
 		Read read = new Read();
