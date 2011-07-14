@@ -143,13 +143,13 @@ public class TriggerGenerator {
         StringBuilder functionString = new StringBuilder();
         Formatter functionFormatter = new Formatter(functionString);
         functionFormatter.format(
-                "CREATE FUNCTION check_%1$s_standalone() RETURNS bool " +
-                "AS " +
-                "'SELECT COUNT(*) > 0 AS num " +
-                "  FROM TestSysRel " +
-                "  WHERE NOT ( " +
+                "CREATE FUNCTION check_%1$s_standalone() RETURNS bool\n" +
+                "AS\n" +
+                "'SELECT COUNT(*) <= 0 AS result\n" +
+                "  FROM TestSysRel\n" +
+                "  WHERE NOT (\n" +
                 "    %2$s\n " +
-                "  )' " +
+                "  )'\n" +
                 "LANGUAGE SQL;",
                 a.name, a.predicate);
 
