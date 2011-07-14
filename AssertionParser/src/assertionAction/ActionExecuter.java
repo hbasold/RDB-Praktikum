@@ -118,7 +118,7 @@ public class ActionExecuter {
         for(AssertionAction a : assertions){
             String error = a.doAction(this.worker);
             if(error != null){
-                return "Error while executing " + a.describe() + " :" + error;
+                return "Error while executing " + a.describe() + " :\n" + error;
             }
         }
         return null;
